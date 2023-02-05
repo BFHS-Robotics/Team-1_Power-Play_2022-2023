@@ -84,13 +84,13 @@ public class OmniOpMode extends LinearOpMode {
     static final double     WHEEL_DIAMETER_MM       = 112.0 ;
     static final double     WHEEL_DIAMETER_INCHES   = WHEEL_DIAMETER_MM/25.4 ;
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /(WHEEL_DIAMETER_INCHES * Math.PI);
-    static final double     DRIVE_SPEED             = 0.45;
-    static final int     maxSlideHeight          = 4000;
+    static final double     DRIVE_SPEED             = 0.7;
+    static final int     maxSlideHeight          = 4050;
     static final int     midSlideHeight          = 2800;
     static final int     lowSlideHeight          = 1650;
     static final int     minSlideHeight          = 10;
 
-    static final double     SLIDE_SPEED             = 0.65;
+    static final double     SLIDE_SPEED             = 0.9;
 
 
     public void extendSlide(double maxDriveSpeed, int slideHeight){
@@ -177,10 +177,10 @@ public class OmniOpMode extends LinearOpMode {
                 claw.setPosition(0.4);
             }
             else if(gamepad1.right_bumper){
-                claw.setPosition(0.45);
+                claw.setPosition(1);
             }
             else if(gamepad1.left_bumper){
-                claw.setPosition(1);
+                claw.setPosition(0.45);
             }
 
             boolean resetSlide = false;
@@ -282,10 +282,10 @@ public class OmniOpMode extends LinearOpMode {
                 slow = !slow;
             }
             if(slow){
-                leftFrontDrive.setPower(leftFrontPower / 2);
-                rightFrontDrive.setPower(rightFrontPower/2);
-                leftBackDrive.setPower(leftBackPower/2);
-                rightBackDrive.setPower(rightBackPower/2);
+                leftFrontDrive.setPower(leftFrontPower / 1.5);
+                rightFrontDrive.setPower(rightFrontPower/1.5);
+                leftBackDrive.setPower(leftBackPower/1.5);
+                rightBackDrive.setPower(rightBackPower/1.5);
             }
             else if(!slow){
                 leftFrontDrive.setPower(leftFrontPower);

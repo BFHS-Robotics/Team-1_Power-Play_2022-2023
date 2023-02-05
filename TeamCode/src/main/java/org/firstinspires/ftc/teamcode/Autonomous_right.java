@@ -160,7 +160,7 @@ public class Autonomous_right extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotorEx.class, "fr");
         rightBackDrive = hardwareMap.get(DcMotorEx.class, "br");
         slide = hardwareMap.get(DcMotorEx.class, "slide");
-        claw = hardwareMap.get(Servo.class, "rightClaw");
+        claw = hardwareMap.get(Servo.class, "claw");
 
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
@@ -221,7 +221,7 @@ public class Autonomous_right extends LinearOpMode {
 
 
         driveStraight(DRIVE_SPEED, 2.0, 0);
-        strafeLeft(DRIVE_SPEED, 10.0);
+        strafeLeft(DRIVE_SPEED, 6.5);
         extendSlide(SLIDE_SPEED, lowSlideHeight);
         driveStraight(DRIVE_SPEED, 5.5, 0);
         openClaw(runtime.milliseconds());

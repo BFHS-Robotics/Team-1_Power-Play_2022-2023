@@ -216,12 +216,13 @@ public class Autonomous_left extends LinearOpMode {
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
         waitForStart();
+
         runtime.reset();
 
         driveStraight(DRIVE_SPEED, 2.0, 0);
-        strafeRight(DRIVE_SPEED, 10.0);
+        strafeRight(DRIVE_SPEED, 9);
         extendSlide(SLIDE_SPEED, lowSlideHeight);
-        driveStraight(DRIVE_SPEED, 7.0, 0);
+        driveStraight(DRIVE_SPEED, 6.5, 0);
         openClaw(runtime.milliseconds());
         //scored first one
         driveStraight(DRIVE_SPEED, -4.0, 0.0);
@@ -229,17 +230,17 @@ public class Autonomous_left extends LinearOpMode {
         retractSlide(SLIDE_SPEED);
         driveStraight(DRIVE_SPEED - 0.15, 57.0, 0.0);
         //plow beacon out of the way
-        driveStraight(DRIVE_SPEED, -9.25, 0.0);
+        driveStraight(DRIVE_SPEED, -6, 0.0);
         turnToHeading(TURN_SPEED, 90.0);
         extendSlide(SLIDE_SPEED, stack5Height);
-        driveStraight(DRIVE_SPEED, 23.75, 90.0);
+        driveStraight(DRIVE_SPEED, 24.75, 90.0);
         extendSlide(SLIDE_SPEED, stack5Height);
         closeClaw(runtime.milliseconds());
         //pick up other cone from stack
         extendSlide(SLIDE_SPEED, lowSlideHeight);
-        driveStraight(DRIVE_SPEED, -24, 90.0);
+        driveStraight(DRIVE_SPEED, -20.75, 90.0);
         extendSlide(SLIDE_SPEED, lowSlideHeight + 200);
-        strafeLeft(DRIVE_SPEED, 12.0);
+        strafeLeft(DRIVE_SPEED, 9.0);
         openClaw(runtime.milliseconds());
         //score x2
         driveStraight(DRIVE_SPEED, -3.0, 90);
@@ -261,15 +262,15 @@ public class Autonomous_left extends LinearOpMode {
     // **********  HIGH Level driving functions.  ********************
 
     public void closeClaw(double milliseconds){
-        claw.setPosition(0.9);
+        claw.setPosition(1);
         wait(milliseconds, 1250);
     }
     public void openClaw(double milliseconds){
-        claw.setPosition(0.25);
+        claw.setPosition(0.45);
         wait(milliseconds, 1250);
     }
     public void centerClaw(double milliseconds){
-        claw.setPosition(0.4);
+        claw.setPosition(0.6);
         wait(milliseconds, 1000);
     }
     public void wait(double milliseconds, double wait){

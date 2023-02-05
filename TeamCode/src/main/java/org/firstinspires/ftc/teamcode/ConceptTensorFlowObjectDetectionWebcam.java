@@ -247,6 +247,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         telemetry.update();
         waitForStart();
         runtime.reset();
+        boolean detect = false;
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
@@ -257,6 +258,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 
 //                    Recognition finalRecognition = null;
                     if (updatedRecognitions != null) {
+                        detect = true;
                         telemetry.addData("# Objects Detected", updatedRecognitions.size());
                         telemetry.update();
 
@@ -290,6 +292,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
 //                        telemetry.addData("- Size (Width/Height)", "%.0f / %.0f", width, height);
 
 
+
                             driveStraight(DRIVE_SPEED, 2.0, 0);
                             strafeLeft(DRIVE_SPEED, 6.5);
                             extendSlide(SLIDE_SPEED, lowSlideHeight);
@@ -316,22 +319,57 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
                             //                       openClaw(runtime.milliseconds());
                             //score x2
                             if (finalRecognition.getLabel().equals(LABELS[0])) { //coin, parking 3
+//                                extendSlide(SLIDE_SPEED, midSlideHeight);
                                 strafeRight(DRIVE_SPEED, 24);
                                 //                        driveStraight(DRIVE_SPEED, 18, -0);
-                            } else if (finalRecognition.getLabel().equals(LABELS[1])) { // gold, parking 1
+                            }
+                            else if (finalRecognition.getLabel().equals(LABELS[1])) { // gold, parking 1
                                 strafeLeft(DRIVE_SPEED, 24);
+//                                openClaw(runtime.milliseconds());
                                 //                        driveStraight(DRIVE_SPEED, -24, -90);
                             } else if (finalRecognition.getLabel().equals(LABELS[2])) { //shamrock,, parking 2
                                 driveStraight(DRIVE_SPEED, -3.0, 0);
                                 //                        retractSlide(SLIDE_SPEED);
+//                                closeClaw(runtime.milliseconds());
                             }
                             retractSlide(SLIDE_SPEED);
                             telemetry.update();
                             break;
                         }
+
                     }
+                    driveStraight(DRIVE_SPEED, 2.0, 0);
+                    strafeLeft(DRIVE_SPEED, 6.5);
+                    extendSlide(SLIDE_SPEED, lowSlideHeight);
+                    driveStraight(DRIVE_SPEED, 5.5, 0);
+                    openClaw(runtime.milliseconds());
+                    //scored first one
+                    driveStraight(DRIVE_SPEED, -4.0, 0.0);
+                    strafeRight(DRIVE_SPEED, 11.5);
+                    retractSlide(SLIDE_SPEED);
+                    driveStraight(DRIVE_SPEED - 0.15, 58, 0.0);
+                    //plow beacon out of the way
+                    driveStraight(DRIVE_SPEED, -9.25, 0.0);
+                    turnToHeading(TURN_SPEED, -90.0);
+                    extendSlide(SLIDE_SPEED, stack5Height);
+                    driveStraight(DRIVE_SPEED, 24.25, -90.0);
+                    extendSlide(SLIDE_SPEED, stack5Height);
+                    closeClaw(runtime.milliseconds());
+                    //pick up other cone from stack
+                    extendSlide(SLIDE_SPEED, lowSlideHeight);
+                    driveStraight(DRIVE_SPEED, -20, -90.0);
+                    extendSlide(SLIDE_SPEED, lowSlideHeight + 175);
+                    strafeRight(DRIVE_SPEED, 12.25);
+                    wait(runtime.milliseconds(), 500);
+                    openClaw(runtime.milliseconds());
+                    //score x2
+                    driveStraight(DRIVE_SPEED, -3.0, -90);
+                    retractSlide(SLIDE_SPEED);
 
                 }
+
+
+                break;
             }
         }
     }
