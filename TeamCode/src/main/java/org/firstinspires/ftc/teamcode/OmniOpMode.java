@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -74,8 +75,10 @@ public class OmniOpMode extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private DcMotorEx slide = null;
+    private DcMotorEx rightSlide = null;
+    private DcMotorEx leftSlide = null;
     private Servo claw = null;
+    private DcMotorEx fourBar = null;
     boolean slow = true;
 
 
@@ -85,39 +88,61 @@ public class OmniOpMode extends LinearOpMode {
     static final double     WHEEL_DIAMETER_INCHES   = WHEEL_DIAMETER_MM/25.4 ;
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /(WHEEL_DIAMETER_INCHES * Math.PI);
     static final double     DRIVE_SPEED             = 0.7;
-    static final int     maxSlideHeight          = 4050;
-    static final int     midSlideHeight          = 2800;
-    static final int     lowSlideHeight          = 1650;
+
+    //these values have to change
+    // TODO
+    static final int     maxSlideHeight          = 3400;
+    static final int     midSlideHeight          = 2150;
+    static final int     lowSlideHeight          = 1000;
     static final int     minSlideHeight          = 10;
 
-    static final double     SLIDE_SPEED             = 0.9;
+    static final int     minFourBar              = 0;
+    static final int     maxFourBar              = (int)((210.0/360.0) * 2786.2); //degree/360 times ticks per encoder revolution
+
+    static final double     SLIDE_SPEED             = 0.7;
+    static final double     FOUR_BAR_SPEED          = 0.5;
 
 
     public void extendSlide(double maxDriveSpeed, int slideHeight){
         int slideTarget = slideHeight;
-        slide.setTargetPosition(slideTarget);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setTargetPosition(slideTarget);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftSlide.setTargetPosition(slideTarget);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         maxDriveSpeed = Math.abs(maxDriveSpeed);
-        while (opModeIsActive() && slide.isBusy() && !(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left)){
-            slide.setPower(maxDriveSpeed);
+        while (opModeIsActive() && rightSlide.isBusy() && leftSlide.isBusy() && !(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left)){
+            rightSlide.setPower(maxDriveSpeed);
+            leftSlide.setPower(maxDriveSpeed);
         }
 
-        slide.setPower(0.0);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setPower(0.0);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftSlide.setPower(0.0);
+        leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     public void retractSlide(double maxDriveSpeed){
         int slideTarget = minSlideHeight;
-        slide.setTargetPosition(slideTarget);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setTargetPosition(slideTarget);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftSlide.setTargetPosition(slideTarget);
+        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         maxDriveSpeed = Math.abs(maxDriveSpeed);
-        while (opModeIsActive() && slide.isBusy()&& !(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left)){
-            slide.setPower(-maxDriveSpeed);
+
+        while (opModeIsActive() && rightSlide.isBusy() && leftSlide.isBusy() && !(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left)){
+            rightSlide.setPower(maxDriveSpeed);
+            leftSlide.setPower(maxDriveSpeed);
         }
 
-        slide.setPower(0.0);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setPower(0.0);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftSlide.setPower(0.0);
+        leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
@@ -129,8 +154,10 @@ public class OmniOpMode extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "bl");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "fr");
         rightBackDrive = hardwareMap.get(DcMotor.class, "br");
-        slide = hardwareMap.get(DcMotorEx.class, "slide");
+        rightSlide = hardwareMap.get(DcMotorEx.class, "rSlide");
+        leftSlide = hardwareMap.get(DcMotorEx.class, "lSlide");
         claw = hardwareMap.get(Servo.class, "claw");
+        fourBar= hardwareMap.get(DcMotorEx.class, "fourBar");
 
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
@@ -146,11 +173,23 @@ public class OmniOpMode extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        slide.setDirection(DcMotor.Direction.FORWARD);
+
+        //find correct directions for slides
+        //TODO
+        rightSlide.setDirection(DcMotor.Direction.FORWARD);
+        leftSlide.setDirection(DcMotor.Direction.REVERSE);
+        fourBar.setDirection(DcMotorSimple.Direction.REVERSE);
         //direction keywords are REVERSE and FORWARD
 
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightSlide.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftSlide.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+//        fourBar.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fourBar.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -169,70 +208,136 @@ public class OmniOpMode extends LinearOpMode {
             double yaw     =  gamepad1.right_stick_x;
 
 
+            //TODO : make the controls for the four bar (player 2?)
+//              if(gamepad2.x && fourBar.getCurrentPosition() < maxFourBar){
+//            if(gamepad2.right_trigger > 0){
+//                fourBar.setPower(FOUR_BAR_SPEED);
+//            }
+//            else if(gamepad2.left_trigger > 0){
+//                fourBar.setPower(FOUR_BAR_SPEED);
+//            }
+            if(gamepad2.x){
+////                 fourBar.setTargetPosition(maxFourBar);
+////                 fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                 fourBar.setPower(FOUR_BAR_SPEED);
+              }
+            else if(gamepad2.y){
+////              else if(gamepad2.y && fourBar.getCurrentPosition() > 5){
+////                  fourBar.setTargetPosition(0);
+////                  fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                  fourBar.setPower(-FOUR_BAR_SPEED);
+              }
+            //|| fourBar.getCurrentPosition() >= maxFourBar || fourBar.getCurrentPosition() <= 5
+              else if(!gamepad2.x && !gamepad2.y){
+                  fourBar.setPower(0);
+//                  fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+              }
+//            boolean resetFourBar = false;
+//            while(gamepad1.start){
+//                fourBar.setPower(-FOUR_BAR_SPEED);
+//                resetFourBar = true;
+//            }
+//            if(resetFourBar){
+//                fourBar.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                fourBar.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
 
-//            boolean clawRight = gamepad1.right_bumper;
-//            boolean clawLeft = gamepad1.left_bumper;
-
-            if(gamepad1.right_bumper && gamepad1.left_bumper){
+            //TODO : find new values for position on closing / opening claw
+            if(gamepad2.a){
                 claw.setPosition(0.4);
             }
-            else if(gamepad1.right_bumper){
-                claw.setPosition(1);
-            }
-            else if(gamepad1.left_bumper){
-                claw.setPosition(0.45);
+            else if(gamepad2.b){
+                claw.setPosition(0.5);
             }
 
             boolean resetSlide = false;
             while(gamepad1.back){
-                slide.setPower(-SLIDE_SPEED);
+                rightSlide.setPower(-SLIDE_SPEED);
+                leftSlide.setPower(-SLIDE_SPEED);
                 resetSlide = true;
             }
             if(resetSlide){
-                slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+                leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
 
-            if(gamepad1.right_trigger > 0 && slide.getCurrentPosition() < maxSlideHeight){
+            if(gamepad2.right_bumper && rightSlide.getCurrentPosition() < maxSlideHeight && leftSlide.getCurrentPosition() < maxSlideHeight){
                 int slideTarget = maxSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(SLIDE_SPEED);
+
+                rightSlide.setTargetPosition(slideTarget);
+                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rightSlide.setPower(SLIDE_SPEED);
+
+                leftSlide.setTargetPosition(slideTarget);
+                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                leftSlide.setPower(SLIDE_SPEED);
             }
-            else if(gamepad1.left_trigger > 0 && slide.getCurrentPosition() > 50){
+            else if(gamepad2.left_bumper && rightSlide.getCurrentPosition() > 50 && leftSlide.getCurrentPosition() > 50){
                 int slideTarget = minSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(-SLIDE_SPEED);
+
+                rightSlide.setTargetPosition(slideTarget);
+                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rightSlide.setPower(-SLIDE_SPEED);
+
+                leftSlide.setTargetPosition(slideTarget);
+                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                leftSlide.setPower(-SLIDE_SPEED);
             }
-            else if(gamepad1.y){
-                int slideTarget = maxSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(SLIDE_SPEED);
-            }
-            else if(gamepad1.x){
-                int slideTarget = midSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(SLIDE_SPEED);
-            }
-            else if(gamepad1.b){
-                int slideTarget = lowSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(SLIDE_SPEED);
-            }
-            else if(gamepad1.a){
-                int slideTarget = minSlideHeight;
-                slide.setTargetPosition(slideTarget);
-                slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slide.setPower(SLIDE_SPEED);
-            }
-            else if((gamepad1.right_trigger == 0 && gamepad1.left_trigger == 0) || gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left || slide.getCurrentPosition() <= 50 || slide.getCurrentPosition() >= maxSlideHeight){
-                slide.setPower(0.0);
-                slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//            else if(gamepad2.y){
+//                int slideTarget = maxSlideHeight;
+//
+//                rightSlide.setTargetPosition(slideTarget);
+//                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                rightSlide.setPower(SLIDE_SPEED);
+//
+//                leftSlide.setTargetPosition(slideTarget);
+//                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                leftSlide.setPower(SLIDE_SPEED);
+//            }
+//            else if(gamepad2.x){
+//                int slideTarget = midSlideHeight;
+//
+//                rightSlide.setTargetPosition(slideTarget);
+//                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                rightSlide.setPower(SLIDE_SPEED);
+//
+//                leftSlide.setTargetPosition(slideTarget);
+//                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                leftSlide.setPower(SLIDE_SPEED);
+//            }
+//            else if(gamepad2.b){
+//                int slideTarget = lowSlideHeight;
+//
+//                rightSlide.setTargetPosition(slideTarget);
+//                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                rightSlide.setPower(SLIDE_SPEED);
+//
+//                leftSlide.setTargetPosition(slideTarget);
+//                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                leftSlide.setPower(SLIDE_SPEED);
+//            }
+//            else if(gamepad2.a){
+//                int slideTarget = minSlideHeight;
+//
+//                rightSlide.setTargetPosition(slideTarget);
+//                rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                rightSlide.setPower(SLIDE_SPEED);
+//
+//                leftSlide.setTargetPosition(slideTarget);
+//                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                leftSlide.setPower(SLIDE_SPEED);
+//            }
+            else if((!gamepad2.left_bumper && !gamepad2.right_bumper) || gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_right || gamepad2.dpad_left || leftSlide.getCurrentPosition() <= 50 || leftSlide.getCurrentPosition() >= maxSlideHeight|| rightSlide.getCurrentPosition() <= 50 || rightSlide.getCurrentPosition() >= maxSlideHeight){
+
+                rightSlide.setPower(0.0);
+                rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                leftSlide.setPower(0.0);
+                leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
 
 
@@ -300,8 +405,10 @@ public class OmniOpMode extends LinearOpMode {
             telemetry.addData("Status", "is slow: " + Boolean.toString(slow));
 //            telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
 //            telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
-            telemetry.addData("current  position", "%4d, %4d", slide.getCurrentPosition(), slide.getCurrentPosition());
+            telemetry.addData("Four bar", " current position " + fourBar.getCurrentPosition());
+            telemetry.addData("current  position", "%4d, %4d", rightSlide.getCurrentPosition(), leftSlide.getCurrentPosition());
             telemetry.update();
+
         }
 
 
