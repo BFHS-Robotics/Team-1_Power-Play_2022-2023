@@ -216,19 +216,19 @@ public class OmniOpMode extends LinearOpMode {
 //            else if(gamepad2.left_trigger > 0){
 //                fourBar.setPower(FOUR_BAR_SPEED);
 //            }
-            if(gamepad2.x){
+            if(gamepad2.left_bumper){
 ////                 fourBar.setTargetPosition(maxFourBar);
 ////                 fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                  fourBar.setPower(FOUR_BAR_SPEED);
               }
-            else if(gamepad2.y){
+            else if(gamepad2.right_bumper){
 ////              else if(gamepad2.y && fourBar.getCurrentPosition() > 5){
 ////                  fourBar.setTargetPosition(0);
 ////                  fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                   fourBar.setPower(-FOUR_BAR_SPEED);
               }
             //|| fourBar.getCurrentPosition() >= maxFourBar || fourBar.getCurrentPosition() <= 5
-              else if(!gamepad2.x && !gamepad2.y){
+              else if(!gamepad2.right_bumper && !gamepad2.left_bumper){
                   fourBar.setPower(0);
 //                  fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
               }
@@ -243,15 +243,15 @@ public class OmniOpMode extends LinearOpMode {
 //            }
 
             //TODO : find new values for position on closing / opening claw
-            if(gamepad2.a){
-                claw.setPosition(0.4);
+            if(gamepad2.b){
+                claw.setPosition(0.35);
             }
-            else if(gamepad2.b){
+            else if(gamepad2.a){
                 claw.setPosition(0.5);
             }
 
             boolean resetSlide = false;
-            while(gamepad1.back){
+            while(gamepad1.back || gamepad2.back){
                 rightSlide.setPower(-SLIDE_SPEED);
                 leftSlide.setPower(-SLIDE_SPEED);
                 resetSlide = true;
@@ -265,7 +265,7 @@ public class OmniOpMode extends LinearOpMode {
             }
 
 
-            if(gamepad2.right_bumper && rightSlide.getCurrentPosition() < maxSlideHeight && leftSlide.getCurrentPosition() < maxSlideHeight){
+            if((gamepad2.right_trigger > 0 || gamepad1.right_trigger > 0) && rightSlide.getCurrentPosition() < maxSlideHeight && leftSlide.getCurrentPosition() < maxSlideHeight){
                 int slideTarget = maxSlideHeight;
 
                 rightSlide.setTargetPosition(slideTarget);
@@ -276,7 +276,7 @@ public class OmniOpMode extends LinearOpMode {
                 leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 leftSlide.setPower(SLIDE_SPEED);
             }
-            else if(gamepad2.left_bumper && rightSlide.getCurrentPosition() > 50 && leftSlide.getCurrentPosition() > 50){
+            else if((gamepad2.left_trigger > 0 || gamepad1.left_trigger > 0) && rightSlide.getCurrentPosition() > 50 && leftSlide.getCurrentPosition() > 50){
                 int slideTarget = minSlideHeight;
 
                 rightSlide.setTargetPosition(slideTarget);
@@ -331,7 +331,7 @@ public class OmniOpMode extends LinearOpMode {
 //                leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //                leftSlide.setPower(SLIDE_SPEED);
 //            }
-            else if((!gamepad2.left_bumper && !gamepad2.right_bumper) || gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_right || gamepad2.dpad_left || leftSlide.getCurrentPosition() <= 50 || leftSlide.getCurrentPosition() >= maxSlideHeight|| rightSlide.getCurrentPosition() <= 50 || rightSlide.getCurrentPosition() >= maxSlideHeight){
+            else if((gamepad2.right_trigger == 0 && gamepad2.left_trigger == 0 && gamepad1.right_trigger == 0 && gamepad1.left_trigger == 0) || gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_right || gamepad2.dpad_left || leftSlide.getCurrentPosition() <= 50 || leftSlide.getCurrentPosition() >= maxSlideHeight|| rightSlide.getCurrentPosition() <= 50 || rightSlide.getCurrentPosition() >= maxSlideHeight){
 
                 rightSlide.setPower(0.0);
                 rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

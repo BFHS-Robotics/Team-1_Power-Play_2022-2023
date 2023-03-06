@@ -154,9 +154,9 @@ public class Autonomous_left extends LinearOpMode {
     //TODO : change these values
     static final int     maxSlideHeight          = 4000;
     static final int     midSlideHeight          = 2800;
-    static final int     lowSlideHeight          = 1750;
+    static final int     lowSlideHeight          = 1450;
     static final int     minSlideHeight          = 5;
-    static final int     stack5Height            = 700;
+    static final int     stack5Height            = 500;
     static final int     maxFourBar              = (int)((210.0 / 360.0) * 8192);
 
     @Override
@@ -207,7 +207,7 @@ public class Autonomous_left extends LinearOpMode {
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        fourBar.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        fourBar.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fourBar.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Wait for the game to start (Display Gyro value while waiting)
         boolean run = true;
@@ -227,7 +227,7 @@ public class Autonomous_left extends LinearOpMode {
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         resetHeading();
 
         // Step through each leg of the path,
@@ -238,31 +238,38 @@ public class Autonomous_left extends LinearOpMode {
 
         runtime.reset();
 
+        fourBar.setPower(0.5);
+        wait(runtime.milliseconds(), 500);
+        fourBar.setPower(0);
+        extendSlide(SLIDE_SPEED, 200);
         driveStraight(DRIVE_SPEED, 2.0, 0);
-        strafeRight(DRIVE_SPEED, 9);
+        strafeRight(DRIVE_SPEED, 7.5);
         extendSlide(SLIDE_SPEED, lowSlideHeight);
-        driveStraight(DRIVE_SPEED, 6.5, 0);
+        driveStraight(DRIVE_SPEED, 7.5, 0);
         openClaw(runtime.milliseconds());
         //scored first one
         driveStraight(DRIVE_SPEED, -4.0, 0.0);
         strafeLeft(DRIVE_SPEED, 12.5);
-        retractSlide(SLIDE_SPEED);
+        closeClaw(runtime.milliseconds());
+        retractSlide(SLIDE_SPEED, minSlideHeight); // TODO: don't retract all the way to plow cone
         driveStraight(DRIVE_SPEED - 0.15, 57.0, 0.0);
         //plow beacon out of the way
-        driveStraight(DRIVE_SPEED, -6, 0.0);
+        driveStraight(DRIVE_SPEED, -8, 0.0);
         turnToHeading(TURN_SPEED, 90.0);
-        extendSlide(SLIDE_SPEED, stack5Height);
-        driveStraight(DRIVE_SPEED, 24.75, 90.0);
-        extendSlide(SLIDE_SPEED, stack5Height);
+        extendSlide(SLIDE_SPEED, lowSlideHeight);
+        driveStraight(DRIVE_SPEED, 28, 90.0);
+        retractSlide(SLIDE_SPEED, stack5Height);
         closeClaw(runtime.milliseconds());
         //pick up other cone from stack
         extendSlide(SLIDE_SPEED, lowSlideHeight);
-        driveStraight(DRIVE_SPEED, -20.75, 90.0);
+        driveStraight(DRIVE_SPEED, -26.0, 90.0);
         extendSlide(SLIDE_SPEED, lowSlideHeight + 200);
-        strafeLeft(DRIVE_SPEED, 9.0);
+        strafeLeft(DRIVE_SPEED, 11.0);
+        driveStraight(DRIVE_SPEED, 3, 90.0);
         openClaw(runtime.milliseconds());
         //score x2
         driveStraight(DRIVE_SPEED, -3.0, 90);
+        retractSlide(runtime.milliseconds(), 0);
 
 
 
@@ -280,29 +287,29 @@ public class Autonomous_left extends LinearOpMode {
 
     // **********  HIGH Level driving functions.  ********************
     //TODO : find positions and times for the four bar
-    public void lowerFourBar(double milliseconds){
-        fourBar.setTargetPosition(0);
-        fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while(opModeIsActive() && fourBar.isBusy()){
-            fourBar.setPower(FOUR_BAR_SPEED);
-        }
-
-        fourBar.setPower(0.0);
-        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    public void liftFourBar(double milliseconds){
-        fourBar.setTargetPosition(0);
-        fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while(opModeIsActive() && fourBar.isBusy()){
-            fourBar.setPower(FOUR_BAR_SPEED);
-        }
-
-        fourBar.setPower(0.0);
-        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
+//    public void lowerFourBar(double milliseconds){
+//        fourBar.setTargetPosition(0);
+//        fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        while(opModeIsActive() && fourBar.isBusy()){
+//            fourBar.setPower(FOUR_BAR_SPEED);
+//        }
+//
+//        fourBar.setPower(0.0);
+//        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//    }
+//
+//    public void liftFourBar(double milliseconds){
+//        fourBar.setTargetPosition(0);
+//        fourBar.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        while(opModeIsActive() && fourBar.isBusy()){
+//            fourBar.setPower(FOUR_BAR_SPEED);
+//        }
+//
+//        fourBar.setPower(0.0);
+//        fourBar.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//    }
 
     //TODO : find new values for these positions - also optimize time if possible
     public void closeClaw(double milliseconds){
@@ -310,7 +317,7 @@ public class Autonomous_left extends LinearOpMode {
         wait(milliseconds, 1000);
     }
     public void openClaw(double milliseconds){
-        claw.setPosition(0.125);
+        claw.setPosition(0.35);
         wait(milliseconds, 1000);
     }
     public void wait(double milliseconds, double wait){
@@ -343,8 +350,8 @@ public class Autonomous_left extends LinearOpMode {
         leftSlide.setPower(0.0);
         leftSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    public void retractSlide(double maxDriveSpeed){
-        int slideTarget = minSlideHeight;
+    public void retractSlide(double maxDriveSpeed, int slideHeight){
+        int slideTarget = slideHeight;
         rightSlide.setTargetPosition(slideTarget);
         rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
